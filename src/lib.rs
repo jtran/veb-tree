@@ -31,6 +31,8 @@ pub struct VanEmdeBoasTree<K, V> {
     summary: Option<Box<VanEmdeBoasTree<K, ()>>>,
     clusters: HashMap<K, VanEmdeBoasTree<K, V>>,
     cluster_size: K,
+    #[cfg(any(test, feature = "safety_checks"))]
+    max_key: K,
 }
 
 impl<K, V> VanEmdeBoasTree<K, V>
@@ -44,6 +46,8 @@ where
             summary: None,
             clusters: HashMap::new(),
             cluster_size: max_key.cluster_size(),
+            #[cfg(any(test, feature = "safety_checks"))]
+            max_key,
         }
     }
 
@@ -70,6 +74,9 @@ where
 
     /// Insert a key-value pair into the tree.  Runs in O(lg lg u) time.
     pub fn insert(&mut self, mut key: K, mut value: V) {
+        #[cfg(any(test, feature = "safety_checks"))]
+        assert!(key <= self.max_key);
+
         if self.is_empty() {
             // When currently empty, be lazy to prevent recursive calls.
             self.min = Some((key.clone(), value.clone()));
