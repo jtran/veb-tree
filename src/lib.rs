@@ -120,6 +120,9 @@ where
 
     /// Remove a key from the tree.  Runs in O(lg lg u) time.
     pub fn remove(&mut self, key: &K) {
+        #[cfg(any(test, feature = "safety_checks"))]
+        assert!(*key <= self.max_key);
+
         let mut key = Cow::Borrowed(key);
         if let Some((min_key, _)) = self.min.as_ref() {
             if *key == *min_key {
@@ -180,6 +183,9 @@ where
 
     /// Get the successor of the given key.  Runs in O(lg lg u) time.
     pub fn successor(&self, key: &K) -> Option<(K, V)> {
+        #[cfg(any(test, feature = "safety_checks"))]
+        assert!(*key <= self.max_key);
+
         // If the key is less than the min, then the successor is the min.
         if let Some((min_key, min_value)) = self.min.as_ref() {
             if *key < *min_key {
@@ -233,6 +239,9 @@ where
 
     /// Get the predecessor of the given key.  Runs in O(lg lg u) time.
     pub fn predecessor(&self, key: &K) -> Option<(K, V)> {
+        #[cfg(any(test, feature = "safety_checks"))]
+        assert!(*key <= self.max_key);
+
         // If the key is greater than the max, then the predecessor is the max.
         if let Some((max_key, max_value)) = self.max.as_ref() {
             if *key > *max_key {
@@ -301,7 +310,7 @@ macro_rules! impl_van_emde_boas_key {
     ($typ: ty) => {
         impl VanEmdeBoasKey for $typ {
             fn cluster_size(&self) -> Self {
-                (*self as f64).sqrt().floor() as Self
+                (*self as f64).sqrt().ceil() as Self
             }
 
             fn high(&self, cluster_size: Self) -> Self {
@@ -326,6 +335,12 @@ impl_van_emde_boas_key!(usize);
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn keys() {
+        assert_eq!(u32::MAX.cluster_size(), 1u32 << 16);
+        assert_eq!(u64::MAX.cluster_size(), 1u64 << 32);
+    }
 
     #[test]
     fn is_empty() {
