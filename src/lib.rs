@@ -330,6 +330,7 @@ macro_rules! impl_van_emde_boas_key {
 
 impl_van_emde_boas_key!(u32);
 impl_van_emde_boas_key!(u64);
+impl_van_emde_boas_key!(u128);
 impl_van_emde_boas_key!(usize);
 
 #[cfg(test)]
@@ -340,6 +341,7 @@ mod tests {
     fn keys() {
         assert_eq!(u32::MAX.cluster_size(), 1u32 << 16);
         assert_eq!(u64::MAX.cluster_size(), 1u64 << 32);
+        assert_eq!(u128::MAX.cluster_size(), 1u128 << 64);
     }
 
     #[test]
