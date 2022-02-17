@@ -50,6 +50,13 @@ Future work:
 
 [btree-map-docs]: https://doc.rust-lang.org/std/collections/struct.BTreeMap.html
 
+### Features
+
+This library has the following features:
+
+- 100% Safe Rust
+- No runtime dependencies besides the standard library
+
 ### License
 
 Dual-licensed under the MIT and Apache 2.0 licenses.
