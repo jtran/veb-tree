@@ -37,6 +37,7 @@ Operation|Runtime|
 Insert|_O_(_log_(_log_(_u_)))|
 Remove|_O_(_log_(_log_(_u_)))|
 Successor, Predecessor|_O_(_log_(_log_(_u_)))|
+Minimum, Maximum|_O_(1)|
 
 For perspective on what these bounds mean: _log_<sub>2</sub>(_log_<sub>2</sub>(2<sup>64</sup>)) = 6 🤯
 
