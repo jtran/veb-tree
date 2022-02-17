@@ -79,6 +79,39 @@ where
         self.min.clone()
     }
 
+    /// Lookup a key in the tree and get its value.  Runs in O(lg lg u) time.
+    pub fn get(&self, key: &K) -> Option<V> {
+        #[cfg(any(test, feature = "safety_checks"))]
+        assert!(*key <= self.max_key);
+
+        // Check the min.
+        if let Some((min_key, min_value)) = self.min.as_ref() {
+            if *key < *min_key {
+                return None;
+            } else if *key == *min_key {
+                return Some(min_value.clone());
+            }
+        }
+        // Check the max.
+        if let Some((max_key, max_value)) = self.max.as_ref() {
+            if *key > *max_key {
+                return None;
+            } else if *key == *max_key {
+                return Some(max_value.clone());
+            }
+        }
+
+        // Get the cluster.
+        let h = key.high(self.cluster_size.clone());
+        let cluster = match self.clusters.get(&h) {
+            None => return None,
+            Some(cluster) => cluster,
+        };
+        let l = key.low(self.cluster_size.clone());
+
+        cluster.get(&l)
+    }
+
     /// Insert a key-value pair into the tree.  Runs in O(lg lg u) time.
     pub fn insert(&mut self, mut key: K, mut value: V) -> Option<V> {
         #[cfg(any(test, feature = "safety_checks"))]

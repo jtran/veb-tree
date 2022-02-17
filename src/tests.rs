@@ -28,6 +28,20 @@ fn insert_same_key_overwrites() {
 }
 
 #[test]
+fn insert_get() {
+    let mut t = VanEmdeBoasTree::<u32, u32>::new();
+    t.insert(1, 10);
+    assert_eq!(t.get(&0), None);
+    assert_eq!(t.get(&1), Some(10));
+    t.insert(3, 30);
+    t.insert(4, 40);
+    assert_eq!(t.get(&2), None);
+    assert_eq!(t.get(&3), Some(30));
+    assert_eq!(t.get(&4), Some(40));
+    assert_eq!(t.get(&5), None);
+}
+
+#[test]
 fn insert_successor() {
     let mut t = VanEmdeBoasTree::<u32, u32>::new();
     t.insert(1, 10);
