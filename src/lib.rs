@@ -22,7 +22,7 @@ use core::hash::Hash;
 use std::borrow::Cow;
 use std::collections::HashMap;
 use std::fmt::Debug;
-use std::mem::swap;
+use std::mem::{replace, swap};
 
 #[derive(Debug, Clone)]
 pub struct VanEmdeBoasTree<K, V> {
@@ -77,7 +77,7 @@ where
     }
 
     /// Insert a key-value pair into the tree.  Runs in O(lg lg u) time.
-    pub fn insert(&mut self, mut key: K, mut value: V) {
+    pub fn insert(&mut self, mut key: K, mut value: V) -> Option<V> {
         #[cfg(any(test, feature = "safety_checks"))]
         assert!(key <= self.max_key);
 
@@ -85,14 +85,20 @@ where
             // When currently empty, be lazy to prevent recursive calls.
             self.min = Some((key.clone(), value.clone()));
             self.max = Some((key, value));
-            return;
+            return None;
         }
+
+        let mut return_value = None;
 
         // If it's less than the min, swap it with the min.
         if let Some((min_key, min_value)) = self.min.as_mut() {
             if key < *min_key {
                 swap(min_key, &mut key);
                 swap(min_value, &mut value);
+            } else if key == *min_key {
+                // If the key is the same, update the value.  Don't return early
+                // in case the max is the same and needs to be updated also.
+                return_value = Some(replace(min_value, value.clone()));
             }
         }
         // If it's greater than the max, swap it with the max.
@@ -100,7 +106,15 @@ where
             if key > *max_key {
                 swap(max_key, &mut key);
                 swap(max_value, &mut value);
+            } else if key == *max_key {
+                // If the key is the same, update the value.
+                return_value = Some(replace(max_value, value.clone()));
             }
+        }
+
+        // If we replaced the min or max, we're done.
+        if return_value.is_some() {
+            return return_value;
         }
 
         let h = key.high(self.cluster_size.clone());
@@ -121,7 +135,7 @@ where
         // When cluster is empty, this recursive call will trigger the lazy case
         // and run in constant time.
         let l = key.low(self.cluster_size.clone());
-        cluster.insert(l, value);
+        cluster.insert(l, value)
     }
 
     /// Remove a key from the tree.  Runs in O(lg lg u) time.
@@ -364,6 +378,16 @@ mod tests {
         assert_eq!(t.is_empty(), false);
         t.remove(&1);
         assert_eq!(t.is_empty(), true);
+    }
+
+    #[test]
+    fn insert_same_key_overwrites() {
+        let mut t = VanEmdeBoasTree::<u32, u32>::new();
+        assert_eq!(t.insert(1, 10), None);
+        assert_eq!(t.successor(&0), Some((1, 10)));
+        // Return the old value.
+        assert_eq!(t.insert(1, 30), Some(10));
+        assert_eq!(t.successor(&0), Some((1, 30)));
     }
 
     #[test]
