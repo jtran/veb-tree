@@ -118,17 +118,18 @@ where
         }
 
         let h = key.high(self.cluster_size.clone());
-        let cluster = self
-            .clusters
-            .entry(h.clone())
-            .or_insert_with(|| VanEmdeBoasTree::with_max_key(self.cluster_size.clone()));
+        let cluster = self.clusters.entry(h.clone()).or_insert_with(|| {
+            VanEmdeBoasTree::with_max_key(self.cluster_size.clone())
+        });
         // Only recurse on the summary if the cluster is empty and is about to
         // transition to non-empty.  This prevents unneeded recursive calls on
         // the summary.
         if cluster.is_empty() {
             self.summary
                 .get_or_insert_with(|| {
-                    Box::new(VanEmdeBoasTree::with_max_key(self.cluster_size.clone()))
+                    Box::new(VanEmdeBoasTree::with_max_key(
+                        self.cluster_size.clone(),
+                    ))
                 })
                 .insert(h, ());
         }
@@ -159,8 +160,11 @@ where
                             .expect("cluster for summary min should exist");
                         let (cluster_min, new_min_value) = cluster
                             .min()
-                            .expect("cluster for summary min should have a min element");
-                        let new_min_key = summary_min.index(cluster_min, self.cluster_size.clone());
+                            .expect(
+                            "cluster for summary min should have a min element",
+                        );
+                        let new_min_key = summary_min
+                            .index(cluster_min, self.cluster_size.clone());
                         self.min = Some((new_min_key.clone(), new_min_value));
                         key = Cow::Owned(new_min_key);
                     }
@@ -192,8 +196,11 @@ where
                             .expect("cluster for summary min should exist");
                         let (cluster_max, new_max_value) = cluster
                             .max()
-                            .expect("cluster for summary min should have a min element");
-                        let new_max_key = summary_max.index(cluster_max, self.cluster_size.clone());
+                            .expect(
+                            "cluster for summary min should have a min element",
+                        );
+                        let new_max_key = summary_max
+                            .index(cluster_max, self.cluster_size.clone());
                         self.max = Some((new_max_key, new_max_value));
                     }
                 }
@@ -241,7 +248,10 @@ where
             if let Some((next_h, _)) = summary.successor(&h) {
                 if let Some(next_cluster) = self.clusters.get(&next_h) {
                     if let Some((next_l, v)) = next_cluster.min() {
-                        return Some((next_h.index(next_l, self.cluster_size.clone()), v));
+                        return Some((
+                            next_h.index(next_l, self.cluster_size.clone()),
+                            v,
+                        ));
                     }
                 }
             }
@@ -297,7 +307,10 @@ where
             if let Some((prev_h, _)) = summary.predecessor(&h) {
                 if let Some(prev_cluster) = self.clusters.get(&prev_h) {
                     if let Some((prev_l, v)) = prev_cluster.max() {
-                        return Some((prev_h.index(prev_l, self.cluster_size.clone()), v));
+                        return Some((
+                            prev_h.index(prev_l, self.cluster_size.clone()),
+                            v,
+                        ));
                     }
                 }
             }
