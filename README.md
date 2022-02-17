@@ -16,8 +16,8 @@ this.
 
 A [cache-oblivious][cache-oblivious-wiki] data-structure is a data-structure
 that takes advantage of modern processor caches, sometimes optimally, without
-knowing the size of the cache.  This means you don't need to parameterize or
-recompile for every device to be optimal.
+knowing the size of the cache.  This means you don't need to parameterize by the
+size of the cache or recompile for every device to be optimal.
 
 [cache-oblivious-wiki]: https://en.wikipedia.org/wiki/Cache-oblivious_algorithm
 
