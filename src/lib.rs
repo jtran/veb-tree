@@ -39,7 +39,11 @@ impl<K, V> VanEmdeBoasTree<K, V>
 where
     K: VanEmdeBoasKey,
 {
-    pub fn new(max_key: K) -> VanEmdeBoasTree<K, V> {
+    pub fn new() -> VanEmdeBoasTree<K, V> {
+        Self::with_max_key(K::max())
+    }
+
+    pub fn with_max_key(max_key: K) -> VanEmdeBoasTree<K, V> {
         VanEmdeBoasTree {
             min: None,
             max: None,
@@ -103,13 +107,15 @@ where
         let cluster = self
             .clusters
             .entry(h.clone())
-            .or_insert_with(|| VanEmdeBoasTree::new(self.cluster_size.clone()));
+            .or_insert_with(|| VanEmdeBoasTree::with_max_key(self.cluster_size.clone()));
         // Only recurse on the summary if the cluster is empty and is about to
         // transition to non-empty.  This prevents unneeded recursive calls on
         // the summary.
         if cluster.is_empty() {
             self.summary
-                .get_or_insert_with(|| Box::new(VanEmdeBoasTree::new(self.cluster_size.clone())))
+                .get_or_insert_with(|| {
+                    Box::new(VanEmdeBoasTree::with_max_key(self.cluster_size.clone()))
+                })
                 .insert(h, ());
         }
         // When cluster is empty, this recursive call will trigger the lazy case
@@ -295,6 +301,8 @@ where
 }
 
 pub trait VanEmdeBoasKey {
+    /// The maximum key that can be represented by this key type.
+    fn max() -> Self;
     /// The size of a single cluster, i.e. square root of the size of the
     /// universe.
     fn cluster_size(&self) -> Self;
@@ -309,6 +317,10 @@ pub trait VanEmdeBoasKey {
 macro_rules! impl_van_emde_boas_key {
     ($typ: ty) => {
         impl VanEmdeBoasKey for $typ {
+            fn max() -> Self {
+                Self::MAX
+            }
+
             fn cluster_size(&self) -> Self {
                 (*self as f64).sqrt().ceil() as Self
             }
@@ -346,7 +358,7 @@ mod tests {
 
     #[test]
     fn is_empty() {
-        let mut t = VanEmdeBoasTree::<u32, u32>::new(u32::MAX);
+        let mut t = VanEmdeBoasTree::<u32, u32>::new();
         assert_eq!(t.is_empty(), true);
         t.insert(1, 10);
         assert_eq!(t.is_empty(), false);
@@ -356,7 +368,7 @@ mod tests {
 
     #[test]
     fn insert_successor() {
-        let mut t = VanEmdeBoasTree::<u32, u32>::new(u32::MAX);
+        let mut t = VanEmdeBoasTree::<u32, u32>::new();
         t.insert(1, 10);
         assert_eq!(t.successor(&0), Some((1, 10)));
         t.insert(3, 30);
@@ -366,7 +378,7 @@ mod tests {
 
     #[test]
     fn insert_predecessor() {
-        let mut t = VanEmdeBoasTree::<u32, u32>::new(u32::MAX);
+        let mut t = VanEmdeBoasTree::<u32, u32>::new();
         t.insert(3, 30);
         assert_eq!(t.predecessor(&4), Some((3, 30)));
         t.insert(1, 10);
@@ -376,7 +388,7 @@ mod tests {
 
     #[test]
     fn insert_remove_successor() {
-        let mut t = VanEmdeBoasTree::<u32, u32>::new(u32::MAX);
+        let mut t = VanEmdeBoasTree::<u32, u32>::new();
         t.insert(1, 10);
         t.remove(&1);
         assert_eq!(t.successor(&0), None);
@@ -384,7 +396,7 @@ mod tests {
 
     #[test]
     fn successor_when_not_in_cluster() {
-        let mut t = VanEmdeBoasTree::<u32, u32>::new(u32::MAX);
+        let mut t = VanEmdeBoasTree::<u32, u32>::new();
         t.insert(1, 10);
         t.insert(u32::MAX, 30);
         assert_eq!(t.successor(&2), Some((u32::MAX, 30)));
@@ -392,7 +404,7 @@ mod tests {
 
     #[test]
     fn predecessor_when_not_in_cluster() {
-        let mut t = VanEmdeBoasTree::<u32, u32>::new(u32::MAX);
+        let mut t = VanEmdeBoasTree::<u32, u32>::new();
         t.insert(1, 10);
         t.insert(u32::MAX, 30);
         assert_eq!(t.predecessor(&u32::MAX), Some((1, 10)));
