@@ -98,8 +98,8 @@ where
             .entry(h.clone())
             .or_insert_with(|| VanEmdeBoasTree::new(self.cluster_size.clone()));
         // Only recurse on the summary if the cluster is empty and is about to
-        // transition to non-empty.  This prevents recursive calls on the
-        // summary.
+        // transition to non-empty.  This prevents unneeded recursive calls on
+        // the summary.
         if cluster.is_empty() {
             self.summary
                 .get_or_insert_with(|| Box::new(VanEmdeBoasTree::new(self.cluster_size.clone())))
@@ -390,5 +390,21 @@ mod tests {
         t.insert(1, 10);
         t.remove(&1);
         assert_eq!(t.successor(&0), None);
+    }
+
+    #[test]
+    fn successor_when_not_in_cluster() {
+        let mut t = VanEmdeBoasTree::<u32, u32>::new(u32::MAX);
+        t.insert(1, 10);
+        t.insert(u32::MAX, 30);
+        assert_eq!(t.successor(&2), Some((u32::MAX, 30)));
+    }
+
+    #[test]
+    fn predecessor_when_not_in_cluster() {
+        let mut t = VanEmdeBoasTree::<u32, u32>::new(u32::MAX);
+        t.insert(1, 10);
+        t.insert(u32::MAX, 30);
+        assert_eq!(t.predecessor(&u32::MAX), Some((1, 10)));
     }
 }
