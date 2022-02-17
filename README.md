@@ -3,7 +3,7 @@
 **Status:** This is a personal project for learning that's not well-tested and
 probably incorrect.
 
-An implementation of the [van Emde Boas tree](veb-tree), a cache-oblivious
+An implementation of the [van Emde Boas tree][veb-tree], a cache-oblivious
 data-structure.
 
 [veb-tree]: https://en.wikipedia.org/wiki/Van_Emde_Boas_tree
@@ -14,7 +14,7 @@ With modern processor architectures, runtime is often dominated by the memory
 hierarchy.  It would be nice if our data-structures and algorithms were aware of
 this.
 
-A [cache-oblivious](cache-oblivious-wiki) data-structure is a data-structure
+A [cache-oblivious][cache-oblivious-wiki] data-structure is a data-structure
 that takes advantage of modern processor caches, sometimes optimally, without
 knowing the size of the cache.  This means you don't need to parameterize or
 recompile for every device to be optimal.
@@ -23,7 +23,7 @@ recompile for every device to be optimal.
 
 ### Details
 
-This strives to implement an interface similar to [BTreeMap](btree-map-docs) in
+This strives to implement an interface similar to [BTreeMap][btree-map-docs] in
 the standard library.
 
 _u_ is the size of the key universe.  For example, if your key needs to be any
