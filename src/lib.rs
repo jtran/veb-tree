@@ -290,65 +290,31 @@ pub trait VanEmdeBoasKey {
     fn index(&self, low: Self, cluster_size: Self) -> Self;
 }
 
-impl VanEmdeBoasKey for u32 {
-    fn cluster_size(&self) -> Self {
-        (*self as f64).sqrt().floor() as Self
-    }
+macro_rules! impl_van_emde_boas_key {
+    ($typ: ty) => {
+        impl VanEmdeBoasKey for $typ {
+            fn cluster_size(&self) -> Self {
+                (*self as f64).sqrt().floor() as Self
+            }
 
-    fn high(&self, cluster_size: Self) -> Self {
-        // self >> 16u32
-        self / cluster_size
-    }
+            fn high(&self, cluster_size: Self) -> Self {
+                self / cluster_size
+            }
 
-    fn low(&self, cluster_size: Self) -> Self {
-        // self & 16u32
-        self % cluster_size
-    }
+            fn low(&self, cluster_size: Self) -> Self {
+                self % cluster_size
+            }
 
-    fn index(&self, low: Self, cluster_size: Self) -> Self {
-        // self << 16u32 + low
-        self * cluster_size + low
-    }
+            fn index(&self, low: Self, cluster_size: Self) -> Self {
+                self * cluster_size + low
+            }
+        }
+    };
 }
 
-impl VanEmdeBoasKey for u64 {
-    fn cluster_size(&self) -> Self {
-        (*self as f64).sqrt().floor() as Self
-    }
-
-    fn high(&self, cluster_size: Self) -> Self {
-        // self >> 32u64
-        self / cluster_size
-    }
-
-    fn low(&self, cluster_size: Self) -> Self {
-        // self & 32u64
-        self % cluster_size
-    }
-
-    fn index(&self, low: Self, cluster_size: Self) -> Self {
-        // self << 32u64 + low
-        self * cluster_size + low
-    }
-}
-
-impl VanEmdeBoasKey for usize {
-    fn cluster_size(&self) -> Self {
-        (*self as f64).sqrt().floor() as Self
-    }
-
-    fn high(&self, cluster_size: Self) -> Self {
-        self / cluster_size
-    }
-
-    fn low(&self, cluster_size: Self) -> Self {
-        self % cluster_size
-    }
-
-    fn index(&self, low: Self, cluster_size: Self) -> Self {
-        self * cluster_size + low
-    }
-}
+impl_van_emde_boas_key!(u32);
+impl_van_emde_boas_key!(u64);
+impl_van_emde_boas_key!(usize);
 
 #[cfg(test)]
 mod tests {
