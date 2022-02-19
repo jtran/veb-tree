@@ -8,6 +8,13 @@ fn keys() {
 }
 
 #[test]
+fn default_impl() {
+    VanEmdeBoasTree::<u32, u32>::default();
+    VanEmdeBoasTree::<u64, u64>::default();
+    VanEmdeBoasTree::<u128, u128>::default();
+}
+
+#[test]
 fn is_empty() {
     let mut t = VanEmdeBoasTree::<u32, u32>::new();
     assert_eq!(t.is_empty(), true);

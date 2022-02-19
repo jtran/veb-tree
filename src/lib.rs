@@ -407,3 +407,12 @@ impl_van_emde_boas_key!(u32);
 impl_van_emde_boas_key!(u64);
 impl_van_emde_boas_key!(u128);
 impl_van_emde_boas_key!(usize);
+
+impl<K, V> Default for VanEmdeBoasTree<K, V>
+where
+    K: VanEmdeBoasKey,
+{
+    fn default() -> Self {
+        Self::new()
+    }
+}
