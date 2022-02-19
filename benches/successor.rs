@@ -8,7 +8,7 @@ use rand::Rng;
 fn criterion_benchmark(c: &mut Criterion) {
     let mut group = c.benchmark_group("successor");
     let mut rng = rand::thread_rng();
-    for num_keys in [10_000, 100_000, 200_000, 300_000, 400_000] {
+    for num_keys in [10_000, 100_000, 500_000, 1_000_000] {
         // Generate random keys.
         let keys: Vec<u64> =
             (0..num_keys).map(|_| rng.gen_range(0..=u64::MAX)).collect();
