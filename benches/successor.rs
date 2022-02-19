@@ -14,7 +14,7 @@ fn criterion_benchmark(c: &mut Criterion) {
             (0..num_keys).map(|_| rng.gen_range(0..=u64::MAX)).collect();
 
         // Insert the same keys into each implementation.
-        let mut tree = cache_oblivious::VanEmdeBoasTree::<u64, u64>::new();
+        let mut tree = veb_tree::VanEmdeBoasTree::<u64, u64>::new();
         for k in &keys {
             tree.insert(*k, *k);
         }

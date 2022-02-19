@@ -1,25 +1,12 @@
-# cache-oblivious
+# veb-tree
 
 **Status:** This is a personal project for learning that's not well-tested and
 probably incorrect.
 
-An implementation of the [van Emde Boas tree][veb-tree], a cache-oblivious
-data-structure.
+An implementation of the [van Emde Boas tree][veb-tree], a fast map
+data-structure with integer keys.
 
 [veb-tree]: https://en.wikipedia.org/wiki/Van_Emde_Boas_tree
-
-### What is a cache-oblivious data-structure?
-
-With modern processor architectures, runtime is often dominated by the memory
-hierarchy.  It would be nice if our data-structures and algorithms were aware of
-this.
-
-A [cache-oblivious][cache-oblivious-wiki] data-structure is a data-structure
-that takes advantage of modern processor caches, sometimes optimally, without
-knowing the size of the cache.  This means you don't need to parameterize by the
-size of the cache or recompile for every device to be optimal.
-
-[cache-oblivious-wiki]: https://en.wikipedia.org/wiki/Cache-oblivious_algorithm
 
 ### Details
 

@@ -1,5 +1,5 @@
-//! This implements a cache-oblivious tree with successor and predecessor
-//! operations.
+//! This implements a van Emde Boas tree, a fast map data-structure with integer
+//! keys.
 //!
 //! u is the size of the key universe.  n is the number of items in the tree,
 //! each in the range [0, u - 1].
