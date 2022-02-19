@@ -46,6 +46,14 @@ This library has the following features:
 - 100% Safe Rust
 - No runtime dependencies besides the standard library
 
+### Benchmarks
+
+Install [`cargo-criterion`](https://github.com/bheisler/cargo-criterion).
+
+```shell
+cargo criterion
+```
+
 ### License
 
 Dual-licensed under the MIT and Apache 2.0 licenses.
