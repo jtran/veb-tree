@@ -29,13 +29,25 @@ Minimum, Maximum|_O_(1)|
 
 For perspective on what these bounds mean: _log_<sub>2</sub>(_log_<sub>2</sub>(2<sup>64</sup>)) = 6 🤯
 
-Future work:
+![Single Run of Successor Comparison with BTreeMap](/doc/successor_single_comparison.svg)
 
-- More tests
-- Benchmarks
-- Convenience methods
-- Iterators
-- Reduce space usage to _O_(_n_)
+In the graph above, lower is better.  The x-axis is the number of items in the
+tree.  The successor operation is run a single time.
+
+The graph shows that the van Emde Boas tree does less work due to the
+_log_(_log_(_u_)) bound.  However, that's not the whole story.
+
+![Multiple Runs of Successor Comparison with BTreeMap](/doc/successor_multiple_random_order_comparison.svg)
+
+In the above graph, lower is better.  The x-axis is the number of items in the
+tree.  The successor operation is run on 100,000 different keys, with keys in
+random order.
+
+The graph shows that the runtime for the van Emde Boas tree levels off since
+it's proportional to the key size _u_, not the number of items in the tree _n_.
+BTreeMap's runtime, on the other hand, continues to grow with _n_.  However, the
+standard library's BTreeMap is optimized well, is very cache friendly, and is
+faster overall, even with 40 million entries.
 
 [btree-map-docs]: https://doc.rust-lang.org/std/collections/struct.BTreeMap.html
 
@@ -45,6 +57,14 @@ This library has the following features:
 
 - 100% Safe Rust
 - No runtime dependencies besides the standard library
+
+Future work:
+
+- More tests
+- Benchmarks
+- Convenience methods
+- Iterators
+- Reduce space usage to _O_(_n_)
 
 ### Benchmarks
 
