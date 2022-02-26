@@ -2,9 +2,9 @@ use super::*;
 
 #[test]
 fn keys() {
-    assert_eq!(u32::MAX.cluster_size(), 1u32 << 16);
-    assert_eq!(u64::MAX.cluster_size(), 1u64 << 32);
-    assert_eq!(u128::MAX.cluster_size(), 1u128 << 64);
+    assert_eq!(u32::max_bits().cluster_bits(), 16u32);
+    assert_eq!(u64::max_bits().cluster_bits(), 32u64);
+    assert_eq!(u128::max_bits().cluster_bits(), 64u128);
 }
 
 #[test]
