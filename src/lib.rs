@@ -434,6 +434,8 @@ macro_rules! impl_van_emde_boas_key {
     };
 }
 
+impl_van_emde_boas_key!(u8);
+impl_van_emde_boas_key!(u16);
 impl_van_emde_boas_key!(u32);
 impl_van_emde_boas_key!(u64);
 impl_van_emde_boas_key!(u128);
