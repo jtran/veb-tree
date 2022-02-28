@@ -91,3 +91,21 @@ fn predecessor_when_not_in_cluster() {
     t.insert(u32::MAX, 30);
     assert_eq!(t.predecessor(&u32::MAX), Some((1, 10)));
 }
+
+#[test]
+fn remove_after_two_inserts_increasing_order() {
+    let mut t = VanEmdeBoasTree::<u32, u32>::new();
+    t.insert(0, 0);
+    t.insert(1, 1);
+    t.remove(&0);
+    assert_eq!(t.get(&0), None);
+}
+
+#[test]
+fn remove_after_two_inserts_decreasing_order() {
+    let mut t = VanEmdeBoasTree::<u32, u32>::new();
+    t.insert(1, 1);
+    t.insert(0, 0);
+    t.remove(&1);
+    assert_eq!(t.get(&1), None);
+}

@@ -153,6 +153,15 @@ where
             return return_value;
         }
 
+        if let Some((min_key, _)) = self.min.as_ref() {
+            if key == *min_key {
+                // If the key is the same as the min key, min and max were
+                // duplicates, and we just swapped the key with the max so that
+                // they aren't duplicates anymore.
+                return None;
+            }
+        }
+
         let h = key.high(self.cluster_bits.clone());
         let cluster = self.clusters.entry(h.clone()).or_insert_with(|| {
             VanEmdeBoasTree::with_max_bits(self.cluster_bits.clone())
