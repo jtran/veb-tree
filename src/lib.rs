@@ -27,6 +27,9 @@ use std::mem::{replace, swap};
 #[cfg(test)]
 mod tests;
 
+#[cfg(test)]
+mod property_tests;
+
 #[derive(Debug, Clone)]
 pub struct VanEmdeBoasTree<K, V> {
     min: Option<(K, V)>,
