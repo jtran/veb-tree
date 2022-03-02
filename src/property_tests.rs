@@ -62,4 +62,62 @@ proptest! {
         t.remove(&k3);
         prop_assert_eq!(t.get(&k3), None);
     }
+
+    #[test]
+    fn predecessor_successor_five_keys(
+        k1 in any::<u64>(),
+        k2 in any::<u64>(),
+        k3 in any::<u64>(),
+        k4 in any::<u64>(),
+        k5 in any::<u64>(),
+    ) {
+        // There could be duplicates.
+        let mut keys = vec![k1, k2, k3, k4, k5];
+        verify_predecessor_successor(keys.as_mut_slice())?
+    }
+}
+
+fn verify_predecessor_successor(keys: &mut [u64]) -> Result<(), TestCaseError> {
+    let mut t = VanEmdeBoasTree::<u64, u64>::new();
+    for k in keys.iter() {
+        t.insert(*k, *k);
+    }
+    // Sort keys after inserting.
+    keys.sort_unstable();
+
+    let min = t.min();
+    prop_assert_eq!(min, Some((keys[0], keys[0])));
+    let mut key = min.unwrap().0;
+    let mut i = 0;
+    loop {
+        prop_assert!(i < keys.len());
+        let successor = t.successor(&key);
+        match successor {
+            Some((k, _)) => {
+                prop_assert!(k > key);
+                key = k;
+            }
+            None => break,
+        }
+        i += 1;
+    }
+
+    let max = t.max();
+    prop_assert_eq!(max, Some((*keys.last().unwrap(), *keys.last().unwrap())));
+    let mut key = max.unwrap().0;
+    let mut i = 0;
+    loop {
+        prop_assert!(i < keys.len());
+        let predecessor = t.predecessor(&key);
+        match predecessor {
+            Some((k, _)) => {
+                prop_assert!(k < key);
+                key = k;
+            }
+            None => break,
+        }
+        i += 1;
+    }
+
+    Ok(())
 }
