@@ -2,11 +2,11 @@ use super::*;
 
 #[test]
 fn key_cluster_size() {
-    assert_eq!(u8::max_size().cluster_size(), 4u8);
-    assert_eq!(u16::max_size().cluster_size(), 8u16);
-    assert_eq!(u32::max_size().cluster_size(), 16u32);
-    assert_eq!(u64::max_size().cluster_size(), 32u64);
-    assert_eq!(u128::max_size().cluster_size(), 64u128);
+    assert_eq!(u8::cluster_size(&u8::max_size()), 4u8);
+    assert_eq!(u16::cluster_size(&u16::max_size()), 8u8);
+    assert_eq!(u32::cluster_size(&u32::max_size()), 16u8);
+    assert_eq!(u64::cluster_size(&u64::max_size()), 32u8);
+    assert_eq!(u128::cluster_size(&u128::max_size()), 64u8);
 }
 
 #[test]
