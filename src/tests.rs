@@ -1,12 +1,12 @@
 use super::*;
 
 #[test]
-fn keys() {
-    assert_eq!(u8::max_bits().cluster_bits(), 4u8);
-    assert_eq!(u16::max_bits().cluster_bits(), 8u16);
-    assert_eq!(u32::max_bits().cluster_bits(), 16u32);
-    assert_eq!(u64::max_bits().cluster_bits(), 32u64);
-    assert_eq!(u128::max_bits().cluster_bits(), 64u128);
+fn key_cluster_size() {
+    assert_eq!(u8::max_size().cluster_size(), 4u8);
+    assert_eq!(u16::max_size().cluster_size(), 8u16);
+    assert_eq!(u32::max_size().cluster_size(), 16u32);
+    assert_eq!(u64::max_size().cluster_size(), 32u64);
+    assert_eq!(u128::max_size().cluster_size(), 64u128);
 }
 
 #[test]

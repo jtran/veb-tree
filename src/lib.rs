@@ -36,9 +36,9 @@ pub struct VanEmdeBoasTree<K, V> {
     max: Option<(K, V)>,
     summary: Option<Box<VanEmdeBoasTree<K, ()>>>,
     clusters: HashMap<K, VanEmdeBoasTree<K, V>>,
-    cluster_bits: K,
+    cluster_size: K,
     #[cfg(any(test, feature = "safety_checks"))]
-    max_bits: K,
+    max_size: K,
 }
 
 impl<K, V> VanEmdeBoasTree<K, V>
@@ -46,18 +46,18 @@ where
     K: VanEmdeBoasKey,
 {
     pub fn new() -> VanEmdeBoasTree<K, V> {
-        Self::with_max_bits(K::max_bits())
+        Self::with_max_size(K::max_size())
     }
 
-    fn with_max_bits(max_bits: K) -> VanEmdeBoasTree<K, V> {
+    fn with_max_size(max_size: K) -> VanEmdeBoasTree<K, V> {
         VanEmdeBoasTree {
             min: None,
             max: None,
             summary: None,
             clusters: HashMap::new(),
-            cluster_bits: max_bits.cluster_bits(),
+            cluster_size: max_size.cluster_size(),
             #[cfg(any(test, feature = "safety_checks"))]
-            max_bits,
+            max_size,
         }
     }
 
@@ -85,7 +85,7 @@ where
     /// Lookup a key in the tree and get its value.  Runs in O(lg lg u) time.
     pub fn get(&self, key: &K) -> Option<V> {
         #[cfg(any(test, feature = "safety_checks"))]
-        assert!(*key <= self.max_bits.bits_to_key());
+        assert!(*key <= self.max_size.size_to_key());
 
         // Check the min.
         if let Some((min_key, min_value)) = self.min.as_ref() {
@@ -105,12 +105,12 @@ where
         }
 
         // Get the cluster.
-        let h = key.high(self.cluster_bits.clone());
+        let h = key.high(self.cluster_size.clone());
         let cluster = match self.clusters.get(&h) {
             None => return None,
             Some(cluster) => cluster,
         };
-        let l = key.low(self.cluster_bits.clone());
+        let l = key.low(self.cluster_size.clone());
 
         cluster.get(&l)
     }
@@ -118,7 +118,7 @@ where
     /// Insert a key-value pair into the tree.  Runs in O(lg lg u) time.
     pub fn insert(&mut self, mut key: K, mut value: V) -> Option<V> {
         #[cfg(any(test, feature = "safety_checks"))]
-        assert!(key <= self.max_bits.bits_to_key(), "key must be representable by cluster's maximum bits: key={:?}, max_bits={:?}, bits_to_key={:?}", key, self.max_bits, self.max_bits.bits_to_key());
+        assert!(key <= self.max_size.size_to_key(), "key must be representable by cluster's maximum size: key={:?}, max_size={:?}, size_to_key={:?}", key, self.max_size, self.max_size.size_to_key());
 
         if self.is_empty() {
             // When currently empty, be lazy to prevent recursive calls.
@@ -165,9 +165,9 @@ where
             }
         }
 
-        let h = key.high(self.cluster_bits.clone());
+        let h = key.high(self.cluster_size.clone());
         let cluster = self.clusters.entry(h.clone()).or_insert_with(|| {
-            VanEmdeBoasTree::with_max_bits(self.cluster_bits.clone())
+            VanEmdeBoasTree::with_max_size(self.cluster_size.clone())
         });
         // Only recurse on the summary if the cluster is empty and is about to
         // transition to non-empty.  This prevents unneeded recursive calls on
@@ -175,22 +175,22 @@ where
         if cluster.is_empty() {
             self.summary
                 .get_or_insert_with(|| {
-                    Box::new(VanEmdeBoasTree::with_max_bits(
-                        self.cluster_bits.clone(),
+                    Box::new(VanEmdeBoasTree::with_max_size(
+                        self.cluster_size.clone(),
                     ))
                 })
                 .insert(h, ());
         }
         // When cluster is empty, this recursive call will trigger the lazy case
         // and run in constant time.
-        let l = key.low(self.cluster_bits.clone());
+        let l = key.low(self.cluster_size.clone());
         cluster.insert(l, value)
     }
 
     /// Remove a key from the tree.  Runs in O(lg lg u) time.
     pub fn remove(&mut self, key: &K) {
         #[cfg(any(test, feature = "safety_checks"))]
-        assert!(*key <= self.max_bits.bits_to_key(), "key must be representable by cluster's maximum bits: key={:?}, max_bits={:?}, bits_to_key={:?}", key, self.max_bits, self.max_bits.bits_to_key());
+        assert!(*key <= self.max_size.size_to_key(), "key must be representable by cluster's maximum size: key={:?}, max_size={:?}, size_to_key={:?}", key, self.max_size, self.max_size.size_to_key());
 
         let mut key = Cow::Borrowed(key);
         if let Some((min_key, _)) = self.min.as_ref() {
@@ -212,7 +212,7 @@ where
                             "cluster for summary min should have a min element",
                         );
                         let new_min_key = summary_min
-                            .index(cluster_min, self.cluster_bits.clone());
+                            .index(cluster_min, self.cluster_size.clone());
                         self.min = Some((new_min_key.clone(), new_min_value));
                         key = Cow::Owned(new_min_key);
                     }
@@ -220,9 +220,9 @@ where
             }
         }
 
-        let h = key.high(self.cluster_bits.clone());
+        let h = key.high(self.cluster_size.clone());
         if let Some(cluster) = self.clusters.get_mut(&h) {
-            cluster.remove(&key.low(self.cluster_bits.clone()));
+            cluster.remove(&key.low(self.cluster_size.clone()));
             if cluster.is_empty() {
                 if let Some(summary) = self.summary.as_mut() {
                     summary.remove(&h);
@@ -248,7 +248,7 @@ where
                             "cluster for summary min should have a min element",
                         );
                         let new_max_key = summary_max
-                            .index(cluster_max, self.cluster_bits.clone());
+                            .index(cluster_max, self.cluster_size.clone());
                         self.max = Some((new_max_key, new_max_value));
                     }
                 }
@@ -259,7 +259,7 @@ where
     /// Get the successor of the given key.  Runs in O(lg lg u) time.
     pub fn successor(&self, key: &K) -> Option<(K, V)> {
         #[cfg(any(test, feature = "safety_checks"))]
-        assert!(*key <= self.max_bits.bits_to_key(), "key must be representable by cluster's maximum bits: key={:?}, max_bits={:?}, bits_to_key={:?}", key, self.max_bits, self.max_bits.bits_to_key());
+        assert!(*key <= self.max_size.size_to_key(), "key must be representable by cluster's maximum size: key={:?}, max_size={:?}, size_to_key={:?}", key, self.max_size, self.max_size.size_to_key());
 
         // If the key is less than the min, then the successor is the min.
         if let Some((min_key, min_value)) = self.min.as_ref() {
@@ -270,10 +270,10 @@ where
 
         // If the key is less than its cluster's max, then the successor is in
         // that cluster.
-        let h = key.high(self.cluster_bits.clone());
+        let h = key.high(self.cluster_size.clone());
         if let Some(cluster) = self.clusters.get(&h) {
             if let Some((cluster_max, _)) = cluster.max() {
-                let l = key.low(self.cluster_bits.clone());
+                let l = key.low(self.cluster_size.clone());
                 if l < cluster_max {
                     // Recurse.
                     let successor = cluster.successor(&l);
@@ -282,7 +282,7 @@ where
                         // key is less than the cluster max.
                         None => panic!("key is less than cluster max, but successor wasn't found; key={key:?}, h={h:?}, l={l:?}, cluster_max={cluster_max:?}"),
                         Some((next_l, v)) => {
-                            return Some((h.index(next_l, self.cluster_bits.clone()), v));
+                            return Some((h.index(next_l, self.cluster_size.clone()), v));
                         }
                     }
                 }
@@ -297,7 +297,7 @@ where
                 if let Some(next_cluster) = self.clusters.get(&next_h) {
                     if let Some((next_l, v)) = next_cluster.min() {
                         return Some((
-                            next_h.index(next_l, self.cluster_bits.clone()),
+                            next_h.index(next_l, self.cluster_size.clone()),
                             v,
                         ));
                     }
@@ -318,7 +318,7 @@ where
     /// Get the predecessor of the given key.  Runs in O(lg lg u) time.
     pub fn predecessor(&self, key: &K) -> Option<(K, V)> {
         #[cfg(any(test, feature = "safety_checks"))]
-        assert!(*key <= self.max_bits.bits_to_key(), "key must be representable by cluster's maximum bits: key={:?}, max_bits={:?}, bits_to_key={:?}", key, self.max_bits, self.max_bits.bits_to_key());
+        assert!(*key <= self.max_size.size_to_key(), "key must be representable by cluster's maximum size: key={:?}, max_size={:?}, size_to_key={:?}", key, self.max_size, self.max_size.size_to_key());
 
         // If the key is greater than the max, then the predecessor is the max.
         if let Some((max_key, max_value)) = self.max.as_ref() {
@@ -329,10 +329,10 @@ where
 
         // If the key is greater than its cluster's min, then the predecessor is
         // in that cluster.
-        let h = key.high(self.cluster_bits.clone());
+        let h = key.high(self.cluster_size.clone());
         if let Some(cluster) = self.clusters.get(&h) {
             if let Some((cluster_min, _)) = cluster.min() {
-                let l = key.low(self.cluster_bits.clone());
+                let l = key.low(self.cluster_size.clone());
                 if l > cluster_min {
                     // Recurse.
                     let predecessor = cluster.predecessor(&l);
@@ -341,7 +341,7 @@ where
                         // key is less than the cluster min.
                         None => panic!("key is less than cluster min, but predecessor wasn't found; key={key:?}, h={h:?}, l={l:?}, cluster_min={cluster_min:?}"),
                         Some((next_l, v)) => {
-                            return Some((h.index(next_l, self.cluster_bits.clone()), v));
+                            return Some((h.index(next_l, self.cluster_size.clone()), v));
                         }
                     }
                 }
@@ -356,7 +356,7 @@ where
                 if let Some(prev_cluster) = self.clusters.get(&prev_h) {
                     if let Some((prev_l, v)) = prev_cluster.max() {
                         return Some((
-                            prev_h.index(prev_l, self.cluster_bits.clone()),
+                            prev_h.index(prev_l, self.cluster_size.clone()),
                             v,
                         ));
                     }
@@ -376,13 +376,13 @@ where
 }
 
 pub trait VanEmdeBoasKey {
-    /// The maximum number of bits that can be represented by this key type.
-    fn max_bits() -> Self;
-    /// Maximum key that can be represented by this number of bits.
-    fn bits_to_key(&self) -> Self;
-    /// The number of bits used to represent a single cluster.  A cluster has a
-    /// size of the square root of the size of the universe.
-    fn cluster_bits(&self) -> Self;
+    /// The maximum size (in bits) that can be represented by this key type.
+    fn max_size() -> Self;
+    /// Maximum key that can be represented by this key size.
+    fn size_to_key(&self) -> Self;
+    /// The size (in number of bits) used to represent a single cluster.  A
+    /// cluster has a size of the square root of the size of the universe.
+    fn cluster_size(&self) -> Self;
     /// The cluster number from the key.
     fn high(&self, cluster_size: Self) -> Self;
     /// The index within the cluster from the key.
@@ -395,13 +395,13 @@ macro_rules! impl_van_emde_boas_key {
     ($typ: ty) => {
         impl VanEmdeBoasKey for $typ {
             #[inline]
-            fn max_bits() -> Self {
+            fn max_size() -> Self {
                 Self::BITS as Self
             }
 
-            fn bits_to_key(&self) -> Self {
-                assert!(*self <= Self::max_bits() as Self);
-                if *self == Self::max_bits() {
+            fn size_to_key(&self) -> Self {
+                assert!(*self <= Self::max_size() as Self);
+                if *self == Self::max_size() {
                     Self::MAX
                 } else {
                     (1 << *self) - 1
@@ -409,26 +409,26 @@ macro_rules! impl_van_emde_boas_key {
             }
 
             #[inline]
-            fn cluster_bits(&self) -> Self {
+            fn cluster_size(&self) -> Self {
                 // ceil(sqrt(self))
                 *self >> 1
             }
 
             #[inline]
-            fn high(&self, cluster_bits: Self) -> Self {
-                // self / cluster_bits
-                *self >> cluster_bits
+            fn high(&self, cluster_size: Self) -> Self {
+                // self / cluster_size
+                *self >> cluster_size
             }
 
             #[inline]
-            fn low(&self, cluster_bits: Self) -> Self {
-                // self % cluster_bits
-                *self & (cluster_bits - 1)
+            fn low(&self, cluster_size: Self) -> Self {
+                // self % cluster_size
+                *self & (cluster_size - 1)
             }
 
             #[inline]
-            fn index(&self, low: Self, cluster_bits: Self) -> Self {
-                (*self << cluster_bits) + low
+            fn index(&self, low: Self, cluster_size: Self) -> Self {
+                (*self << cluster_size) + low
             }
         }
     };
