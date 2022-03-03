@@ -30,30 +30,31 @@ mod tests;
 #[cfg(test)]
 mod property_tests;
 
+/// A map implemented with a van Emde Boas tree.
 #[derive(Debug, Clone)]
-pub struct VanEmdeBoasTree<K, V>
+pub struct VebTreeMap<K, V>
 where
-    K: VanEmdeBoasKey,
+    K: VebKey,
 {
     min: Option<(K, V)>,
     max: Option<(K, V)>,
-    summary: Option<Box<VanEmdeBoasTree<K, ()>>>,
-    clusters: HashMap<K, VanEmdeBoasTree<K, V>>,
+    summary: Option<Box<VebTreeMap<K, ()>>>,
+    clusters: HashMap<K, VebTreeMap<K, V>>,
     cluster_size: K::Size,
     #[cfg(any(test, feature = "safety_checks"))]
     max_size: K::Size,
 }
 
-impl<K, V> VanEmdeBoasTree<K, V>
+impl<K, V> VebTreeMap<K, V>
 where
-    K: VanEmdeBoasKey,
+    K: VebKey,
 {
-    pub fn new() -> VanEmdeBoasTree<K, V> {
+    pub fn new() -> VebTreeMap<K, V> {
         Self::with_max_size(K::max_size())
     }
 
-    fn with_max_size(max_size: K::Size) -> VanEmdeBoasTree<K, V> {
-        VanEmdeBoasTree {
+    fn with_max_size(max_size: K::Size) -> VebTreeMap<K, V> {
+        VebTreeMap {
             min: None,
             max: None,
             summary: None,
@@ -70,9 +71,9 @@ where
     }
 }
 
-impl<K, V> VanEmdeBoasTree<K, V>
+impl<K, V> VebTreeMap<K, V>
 where
-    K: VanEmdeBoasKey + Ord + Clone + Hash + Eq + Debug,
+    K: VebKey + Ord + Clone + Hash + Eq + Debug,
     V: Clone + Debug,
 {
     /// Get the maximum element in the tree.  Runs in O(1) time.
@@ -170,7 +171,7 @@ where
 
         let h = key.high(&self.cluster_size);
         let cluster = self.clusters.entry(h.clone()).or_insert_with(|| {
-            VanEmdeBoasTree::with_max_size(self.cluster_size.clone())
+            VebTreeMap::with_max_size(self.cluster_size.clone())
         });
         // Only recurse on the summary if the cluster is empty and is about to
         // transition to non-empty.  This prevents unneeded recursive calls on
@@ -178,7 +179,7 @@ where
         if cluster.is_empty() {
             self.summary
                 .get_or_insert_with(|| {
-                    Box::new(VanEmdeBoasTree::with_max_size(
+                    Box::new(VebTreeMap::with_max_size(
                         self.cluster_size.clone(),
                     ))
                 })
@@ -378,7 +379,7 @@ where
     }
 }
 
-pub trait VanEmdeBoasKey {
+pub trait VebKey {
     /// The size (in bits) of a universe or child cluster.
     type Size: Clone + Debug;
 
@@ -397,9 +398,9 @@ pub trait VanEmdeBoasKey {
     fn index(&self, low: Self, cluster_size: &Self::Size) -> Self;
 }
 
-macro_rules! impl_van_emde_boas_key {
+macro_rules! impl_veb_key {
     ($typ: ty) => {
-        impl VanEmdeBoasKey for $typ {
+        impl VebKey for $typ {
             type Size = u8;
 
             #[inline]
@@ -442,16 +443,16 @@ macro_rules! impl_van_emde_boas_key {
     };
 }
 
-impl_van_emde_boas_key!(u8);
-impl_van_emde_boas_key!(u16);
-impl_van_emde_boas_key!(u32);
-impl_van_emde_boas_key!(u64);
-impl_van_emde_boas_key!(u128);
-impl_van_emde_boas_key!(usize);
+impl_veb_key!(u8);
+impl_veb_key!(u16);
+impl_veb_key!(u32);
+impl_veb_key!(u64);
+impl_veb_key!(u128);
+impl_veb_key!(usize);
 
-impl<K, V> Default for VanEmdeBoasTree<K, V>
+impl<K, V> Default for VebTreeMap<K, V>
 where
-    K: VanEmdeBoasKey,
+    K: VebKey,
 {
     fn default() -> Self {
         Self::new()

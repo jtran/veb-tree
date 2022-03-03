@@ -11,14 +11,14 @@ fn key_cluster_size() {
 
 #[test]
 fn default_impl() {
-    VanEmdeBoasTree::<u32, u32>::default();
-    VanEmdeBoasTree::<u64, u64>::default();
-    VanEmdeBoasTree::<u128, u128>::default();
+    VebTreeMap::<u32, u32>::default();
+    VebTreeMap::<u64, u64>::default();
+    VebTreeMap::<u128, u128>::default();
 }
 
 #[test]
 fn is_empty() {
-    let mut t = VanEmdeBoasTree::<u32, u32>::new();
+    let mut t = VebTreeMap::<u32, u32>::new();
     assert_eq!(t.is_empty(), true);
     t.insert(1, 10);
     assert_eq!(t.is_empty(), false);
@@ -28,7 +28,7 @@ fn is_empty() {
 
 #[test]
 fn insert_same_key_overwrites() {
-    let mut t = VanEmdeBoasTree::<u32, u32>::new();
+    let mut t = VebTreeMap::<u32, u32>::new();
     assert_eq!(t.insert(1, 10), None);
     assert_eq!(t.successor(&0), Some((1, 10)));
     // Return the old value.
@@ -38,7 +38,7 @@ fn insert_same_key_overwrites() {
 
 #[test]
 fn insert_get() {
-    let mut t = VanEmdeBoasTree::<u32, u32>::new();
+    let mut t = VebTreeMap::<u32, u32>::new();
     t.insert(1, 10);
     assert_eq!(t.get(&0), None);
     assert_eq!(t.get(&1), Some(10));
@@ -52,7 +52,7 @@ fn insert_get() {
 
 #[test]
 fn insert_successor() {
-    let mut t = VanEmdeBoasTree::<u32, u32>::new();
+    let mut t = VebTreeMap::<u32, u32>::new();
     t.insert(1, 10);
     assert_eq!(t.successor(&0), Some((1, 10)));
     t.insert(3, 30);
@@ -62,7 +62,7 @@ fn insert_successor() {
 
 #[test]
 fn insert_predecessor() {
-    let mut t = VanEmdeBoasTree::<u32, u32>::new();
+    let mut t = VebTreeMap::<u32, u32>::new();
     t.insert(3, 30);
     assert_eq!(t.predecessor(&4), Some((3, 30)));
     t.insert(1, 10);
@@ -72,7 +72,7 @@ fn insert_predecessor() {
 
 #[test]
 fn insert_remove_successor() {
-    let mut t = VanEmdeBoasTree::<u32, u32>::new();
+    let mut t = VebTreeMap::<u32, u32>::new();
     t.insert(1, 10);
     t.remove(&1);
     assert_eq!(t.successor(&0), None);
@@ -80,7 +80,7 @@ fn insert_remove_successor() {
 
 #[test]
 fn successor_when_not_in_cluster() {
-    let mut t = VanEmdeBoasTree::<u32, u32>::new();
+    let mut t = VebTreeMap::<u32, u32>::new();
     t.insert(1, 10);
     t.insert(u32::MAX, 30);
     assert_eq!(t.successor(&2), Some((u32::MAX, 30)));
@@ -88,7 +88,7 @@ fn successor_when_not_in_cluster() {
 
 #[test]
 fn predecessor_when_not_in_cluster() {
-    let mut t = VanEmdeBoasTree::<u32, u32>::new();
+    let mut t = VebTreeMap::<u32, u32>::new();
     t.insert(1, 10);
     t.insert(u32::MAX, 30);
     assert_eq!(t.predecessor(&u32::MAX), Some((1, 10)));
@@ -96,7 +96,7 @@ fn predecessor_when_not_in_cluster() {
 
 #[test]
 fn remove_after_two_inserts_increasing_order() {
-    let mut t = VanEmdeBoasTree::<u32, u32>::new();
+    let mut t = VebTreeMap::<u32, u32>::new();
     t.insert(0, 0);
     t.insert(1, 1);
     t.remove(&0);
@@ -105,7 +105,7 @@ fn remove_after_two_inserts_increasing_order() {
 
 #[test]
 fn remove_after_two_inserts_decreasing_order() {
-    let mut t = VanEmdeBoasTree::<u32, u32>::new();
+    let mut t = VebTreeMap::<u32, u32>::new();
     t.insert(1, 1);
     t.insert(0, 0);
     t.remove(&1);

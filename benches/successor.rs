@@ -17,7 +17,7 @@ fn bench_successor_single(c: &mut Criterion) {
             (0..num_keys).map(|_| rng.gen_range(0..=u64::MAX)).collect();
 
         // Insert the same keys into each implementation.
-        let mut tree = veb_tree::VanEmdeBoasTree::<u64, u64>::new();
+        let mut tree = veb_tree::VebTreeMap::<u64, u64>::new();
         for k in &keys {
             tree.insert(*k, *k);
         }
@@ -29,7 +29,7 @@ fn bench_successor_single(c: &mut Criterion) {
 
         // Benchmark each implementation.
         group.bench_with_input(
-            BenchmarkId::new("VanEmdeBoasTree", num_keys),
+            BenchmarkId::new("VebTreeMap", num_keys),
             &num_keys,
             |b, _i| {
                 b.iter(|| {
@@ -72,7 +72,7 @@ fn bench_successor_multiple_in_order(c: &mut Criterion) {
             (0..num_keys).map(|_| rng.gen_range(0..=u64::MAX)).collect();
 
         // Insert the same keys into each implementation.
-        let mut tree = veb_tree::VanEmdeBoasTree::<u64, u64>::new();
+        let mut tree = veb_tree::VebTreeMap::<u64, u64>::new();
         for k in &keys {
             tree.insert(*k, *k);
         }
@@ -92,7 +92,7 @@ fn bench_successor_multiple_in_order(c: &mut Criterion) {
 
         // Benchmark each implementation.
         group.bench_with_input(
-            BenchmarkId::new("VanEmdeBoasTree", num_keys),
+            BenchmarkId::new("VebTreeMap", num_keys),
             &num_keys,
             |b, _i| {
                 b.iter(|| {
@@ -139,7 +139,7 @@ fn bench_successor_multiple_random_order(c: &mut Criterion) {
             (0..num_keys).map(|_| rng.gen_range(0..=u64::MAX)).collect();
 
         // Insert the same keys into each implementation.
-        let mut tree = veb_tree::VanEmdeBoasTree::<u64, u64>::new();
+        let mut tree = veb_tree::VebTreeMap::<u64, u64>::new();
         for k in &keys {
             tree.insert(*k, *k);
         }
@@ -156,7 +156,7 @@ fn bench_successor_multiple_random_order(c: &mut Criterion) {
 
         // Benchmark each implementation.
         group.bench_with_input(
-            BenchmarkId::new("VanEmdeBoasTree", num_keys),
+            BenchmarkId::new("VebTreeMap", num_keys),
             &num_keys,
             |b, _i| {
                 b.iter(|| {
