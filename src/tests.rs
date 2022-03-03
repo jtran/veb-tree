@@ -27,6 +27,17 @@ fn is_empty() {
 }
 
 #[test]
+fn clear() {
+    let mut t = VebTreeMap::<u32, u32>::new();
+    t.insert(1, 10);
+    t.insert(2, 20);
+    t.insert(3, 30);
+    assert_eq!(t.is_empty(), false);
+    t.clear();
+    assert_eq!(t.is_empty(), true);
+}
+
+#[test]
 fn insert_same_key_overwrites() {
     let mut t = VebTreeMap::<u32, u32>::new();
     assert_eq!(t.insert(1, 10), None);

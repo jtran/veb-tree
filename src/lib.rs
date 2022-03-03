@@ -69,6 +69,11 @@ where
     pub fn is_empty(&self) -> bool {
         self.min.is_none()
     }
+
+    /// Removes all elements.
+    pub fn clear(&mut self) {
+        *self = Self::new();
+    }
 }
 
 impl<K, V> VebTreeMap<K, V>
