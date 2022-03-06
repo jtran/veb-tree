@@ -52,7 +52,7 @@ fn bench_successor_single(c: &mut Criterion) {
 }
 
 macro_rules! bench_successor_key {
-    ($fn_name: ident, $name: expr, $sort_keys: expr) => {
+    ($fn_name: ident, $name: expr, $key_ty: ty, $max_key: expr, $sort_keys: expr) => {
         fn $fn_name(c: &mut Criterion) {
             let mut group = c.benchmark_group($name);
             group.measurement_time(Duration::from_secs(20));
@@ -70,22 +70,22 @@ macro_rules! bench_successor_key {
                 }
 
                 // Generate random keys.
-                let keys: Vec<u64> = (0..num_keys).collect();
+                let keys: Vec<$key_ty> = (0..num_keys).collect();
 
                 // Insert the same keys into each implementation.
-                let mut tree = veb_tree::VebTreeMap::<u64, u64>::new();
+                let mut tree = veb_tree::VebTreeMap::<$key_ty, u64>::new();
                 for k in &keys {
-                    tree.insert(*k, *k);
+                    tree.insert(*k, *k as u64);
                 }
 
-                let mut b_tree: BTreeMap<u64, u64> = BTreeMap::new();
+                let mut b_tree: BTreeMap<$key_ty, u64> = BTreeMap::new();
                 for k in &keys {
-                    b_tree.insert(*k, *k);
+                    b_tree.insert(*k, *k as u64);
                 }
 
                 // Generate random keys to search for.
-                let mut target_keys: Vec<u64> = (0..num_targets)
-                    .map(|_| rng.gen_range(0..=u64::MAX))
+                let mut target_keys: Vec<$key_ty> = (0..num_targets)
+                    .map(|_| rng.gen_range(0..=$max_key))
                     .collect();
 
                 if $sort_keys {
@@ -126,12 +126,24 @@ macro_rules! bench_successor_key {
 bench_successor_key!(
     bench_successor_multiple_in_order,
     "successor_multiple_in_order",
+    u64,
+    u64::MAX,
     true
 );
 
 bench_successor_key!(
     bench_successor_multiple_random_order,
     "successor_multiple_random_order",
+    u64,
+    u64::MAX,
+    false
+);
+
+bench_successor_key!(
+    bench_successor_multiple_random_order_u32,
+    "successor_multiple_random_order_u32",
+    u32,
+    u32::MAX,
     false
 );
 
@@ -139,6 +151,7 @@ criterion_group!(
     benches,
     bench_successor_single,
     bench_successor_multiple_in_order,
-    bench_successor_multiple_random_order
+    bench_successor_multiple_random_order,
+    bench_successor_multiple_random_order_u32,
 );
 criterion_main!(benches);
