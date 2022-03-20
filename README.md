@@ -17,17 +17,17 @@ _u_ is the size of the key universe.  For example, if your key needs to be any
 64-bit integer, then _u_ = 2<sup>64</sup>.  _n_ is the number of items in the
 tree, each in the range [0, _u_ - 1].
 
-The current implementation uses _O_(_n_ * _log_(_log_(_u_))) space.
+The current implementation uses _O_(_n_ * log(log(_u_))) space.
 
 Operation|Runtime|
 ---|---
-Insert|_O_(_log_(_log_(_u_)))|
-Remove|_O_(_log_(_log_(_u_)))|
-Lookup|_O_(_log_(_log_(_u_)))|
-Successor, Predecessor|_O_(_log_(_log_(_u_)))|
+Insert|_O_(log(log(_u_)))|
+Remove|_O_(log(log(_u_)))|
+Lookup|_O_(log(log(_u_)))|
+Successor, Predecessor|_O_(log(log(_u_)))|
 Minimum, Maximum|_O_(1)|
 
-For perspective on what these bounds mean: _log_<sub>2</sub>(_log_<sub>2</sub>(2<sup>64</sup>)) = 6 🤯
+For perspective on what these bounds mean: log<sub>2</sub>(log<sub>2</sub>(2<sup>64</sup>)) = 6 🤯
 
 ![Single Run of Successor Comparison with BTreeMap](/doc/successor_single_comparison.svg)
 
@@ -35,7 +35,7 @@ In the graph above, lower is better.  The x-axis is the number of items in the
 tree.  The successor operation is run a single time.
 
 The graph shows that the van Emde Boas tree does less work due to the
-_log_(_log_(_u_)) bound.  However, that's not the whole story.
+log(log(_u_)) bound.  However, that's not the whole story.
 
 ![Multiple Runs of Successor Comparison with BTreeMap](/doc/successor_multiple_random_order_comparison.svg)
 
