@@ -410,7 +410,7 @@ macro_rules! impl_veb_key {
 
             #[inline]
             fn max_size() -> Self::Size {
-                Self::BITS as u8
+                u8::try_from(Self::BITS).expect("number of bits must fit in u8")
             }
 
             fn size_to_key(universe_size: &Self::Size) -> Self {
@@ -437,7 +437,7 @@ macro_rules! impl_veb_key {
             #[inline]
             fn low(&self, cluster_size: &Self::Size) -> Self {
                 // self % cluster_size
-                *self & (cluster_size - 1) as Self
+                *self & Self::from(cluster_size - 1)
             }
 
             #[inline]
