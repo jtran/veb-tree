@@ -437,6 +437,8 @@ macro_rules! impl_veb_key {
             #[inline]
             fn low(&self, cluster_size: &Self::Size) -> Self {
                 // self % cluster_size
+                #[cfg(any(test, feature = "safety_checks"))]
+                assert!(*cluster_size > 0);
                 *self & Self::from(cluster_size - 1)
             }
 
