@@ -17,10 +17,9 @@ _u_ is the size of the key universe.  For example, if your key needs to be any
 64-bit integer, then _u_ = 2<sup>64</sup>.  _n_ is the number of items in the
 tree, each in the range [0, _u_ - 1].
 
-The current implementation uses _O_(_n_ * log(log(_u_))) space.
-
-Operation|Runtime|
+Operation|Bound|
 ---|---
+Space|_O_(_n_ * log(log(_u_)))|
 Insert|_O_(log(log(_u_)))|
 Remove|_O_(log(log(_u_)))|
 Lookup|_O_(log(log(_u_)))|
@@ -49,6 +48,9 @@ BTreeMap's runtime, on the other hand, continues to grow with _n_.  However, the
 standard library's BTreeMap is optimized well, is very cache friendly, and is
 faster overall, even with 40 million entries.
 
+Reducing the size of the keys by using u32 for the key type, VebTreeMap is
+faster than BTreeMap.  This is not currently shown in a graph.
+
 [btree-map-docs]: https://doc.rust-lang.org/std/collections/struct.BTreeMap.html
 
 ### Features
@@ -57,13 +59,15 @@ This library has the following features:
 
 - 100% Safe Rust
 - No runtime dependencies besides the standard library
+- Property tests
+- Benchmarks measuring statistical significance
 
 Future work:
 
 - More tests
-- Benchmarks
+- More benchmarks
 - Convenience methods
-- Iterators
+- Iterators, Range API, Entry API
 - Reduce space usage to _O_(_n_)
 
 ### Benchmarks
