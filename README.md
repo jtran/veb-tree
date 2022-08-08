@@ -44,12 +44,10 @@ random order.
 
 The graph shows that the runtime for the van Emde Boas tree levels off since
 it's proportional to the key size _u_, not the number of items in the tree _n_.
-BTreeMap's runtime, on the other hand, continues to grow with _n_.  However, the
-standard library's BTreeMap is optimized well, is very cache friendly, and is
-faster overall, even with 40 million entries.
+BTreeMap's runtime, on the other hand, continues to grow with _n_.
 
-Reducing the size of the keys by using u32 for the key type, VebTreeMap is
-faster than BTreeMap.  This is not currently shown in a graph.
+Depending on your processor, reducing the size of the keys by using u32 or
+smaller for the key type may make VebTreeMap even faster.
 
 [btree-map-docs]: https://doc.rust-lang.org/std/collections/struct.BTreeMap.html
 
