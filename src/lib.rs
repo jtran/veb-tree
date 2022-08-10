@@ -98,18 +98,18 @@ where
 
         // Check the min.
         if let Some((min_key, min_value)) = self.min.as_ref() {
-            if *key < *min_key {
-                return None;
-            } else if *key == *min_key {
-                return Some(min_value.clone());
+            match key.cmp(min_key) {
+                std::cmp::Ordering::Less => return None,
+                std::cmp::Ordering::Equal => return Some(min_value.clone()),
+                std::cmp::Ordering::Greater => {}
             }
         }
         // Check the max.
         if let Some((max_key, max_value)) = self.max.as_ref() {
-            if *key > *max_key {
-                return None;
-            } else if *key == *max_key {
-                return Some(max_value.clone());
+            match key.cmp(max_key) {
+                std::cmp::Ordering::Greater => return None,
+                std::cmp::Ordering::Equal => return Some(max_value.clone()),
+                std::cmp::Ordering::Less => {}
             }
         }
 
@@ -140,23 +140,32 @@ where
 
         // If it's less than the min, swap it with the min.
         if let Some((min_key, min_value)) = self.min.as_mut() {
-            if key < *min_key {
-                swap(min_key, &mut key);
-                swap(min_value, &mut value);
-            } else if key == *min_key {
-                // If the key is the same, update the value.  Don't return early
-                // in case the max is the same and needs to be updated also.
-                return_value = Some(replace(min_value, value.clone()));
+            match key.cmp(min_key) {
+                std::cmp::Ordering::Less => {
+                    swap(min_key, &mut key);
+                    swap(min_value, &mut value);
+                }
+                std::cmp::Ordering::Equal => {
+                    // If the key is the same, update the value.  Don't return
+                    // early in case the max is the same and needs to be updated
+                    // also.
+                    return_value = Some(replace(min_value, value.clone()));
+                }
+                std::cmp::Ordering::Greater => {}
             }
         }
         // If it's greater than the max, swap it with the max.
         if let Some((max_key, max_value)) = self.max.as_mut() {
-            if key > *max_key {
-                swap(max_key, &mut key);
-                swap(max_value, &mut value);
-            } else if key == *max_key {
-                // If the key is the same, update the value.
-                return_value = Some(replace(max_value, value.clone()));
+            match key.cmp(max_key) {
+                std::cmp::Ordering::Greater => {
+                    swap(max_key, &mut key);
+                    swap(max_value, &mut value);
+                }
+                std::cmp::Ordering::Equal => {
+                    // If the key is the same, update the value.
+                    return_value = Some(replace(max_value, value.clone()));
+                }
+                std::cmp::Ordering::Less => {}
             }
         }
 
