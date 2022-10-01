@@ -9,7 +9,7 @@ edition = "2021"
 safety_checks = []
 
 [dev-dependencies]
-criterion = "0.3.6"
+criterion = { version = "0.4.0", features = ["html_reports"] }
 proptest = "1.0"
 rand = "0.8.5"
 
