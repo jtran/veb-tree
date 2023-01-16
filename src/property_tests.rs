@@ -73,7 +73,7 @@ proptest! {
     ) {
         // There could be duplicates.
         let mut keys = vec![k1, k2, k3, k4, k5];
-        verify_predecessor_successor(keys.as_mut_slice())?
+        verify_predecessor_successor(keys.as_mut_slice())?;
     }
 }
 

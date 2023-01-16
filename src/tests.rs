@@ -19,11 +19,11 @@ fn default_impl() {
 #[test]
 fn is_empty() {
     let mut t = VebTreeMap::<u32, u32>::new();
-    assert_eq!(t.is_empty(), true);
+    assert!(t.is_empty());
     t.insert(1, 10);
-    assert_eq!(t.is_empty(), false);
+    assert!(!t.is_empty());
     t.remove(&1);
-    assert_eq!(t.is_empty(), true);
+    assert!(t.is_empty());
 }
 
 #[test]
@@ -32,9 +32,9 @@ fn clear() {
     t.insert(1, 10);
     t.insert(2, 20);
     t.insert(3, 30);
-    assert_eq!(t.is_empty(), false);
+    assert!(!t.is_empty());
     t.clear();
-    assert_eq!(t.is_empty(), true);
+    assert!(t.is_empty());
 }
 
 #[test]
