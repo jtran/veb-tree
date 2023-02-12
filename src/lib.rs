@@ -18,6 +18,28 @@
 //! square root of u.
 //!
 //! For example, if u = 2^32, then the cluster size is 2^16.
+
+#![warn(
+    clippy::as_conversions,
+    clippy::borrow_as_ptr,
+    clippy::cloned_instead_of_copied,
+    clippy::dbg_macro,
+    clippy::debug_assert_with_mut_call,
+    // spell-checker: disable-next-line
+    clippy::disallowed_script_idents,
+    clippy::doc_markdown,
+    clippy::imprecise_flops,
+    clippy::inefficient_to_string,
+    clippy::let_underscore_must_use,
+    clippy::match_wildcard_for_single_variants,
+    clippy::ref_binding_to_reference,
+    clippy::ref_option_ref,
+    clippy::rest_pat_in_fully_bound_structs,
+    clippy::semicolon_if_nothing_returned,
+    clippy::str_to_string,
+    clippy::suboptimal_flops
+)]
+
 use core::hash::Hash;
 use std::borrow::Cow;
 use std::collections::HashMap;
