@@ -137,10 +137,7 @@ where
 
         // Get the cluster.
         let h = key.high(&self.cluster_size);
-        let cluster = match self.clusters.get(&h) {
-            None => return None,
-            Some(cluster) => cluster,
-        };
+        let cluster = self.clusters.get(&h)?;
         let l = key.low(&self.cluster_size);
 
         cluster.get(&l)
