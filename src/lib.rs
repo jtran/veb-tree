@@ -146,7 +146,13 @@ where
     /// Insert a key-value pair into the tree.  Runs in O(lg lg u) time.
     pub fn insert(&mut self, mut key: K, mut value: V) -> Option<V> {
         #[cfg(any(test, feature = "safety_checks"))]
-        assert!(key <= K::size_to_key(&self.max_size), "key must be representable by cluster's maximum size: key={:?}, max_size={:?}, size_to_key={:?}", key, self.max_size, K::size_to_key(&self.max_size));
+        assert!(
+            key <= K::size_to_key(&self.max_size),
+            "key must be representable by cluster's maximum size: key={:?}, max_size={:?}, size_to_key={:?}",
+            key,
+            self.max_size,
+            K::size_to_key(&self.max_size)
+        );
 
         if self.is_empty() {
             // When currently empty, be lazy to prevent recursive calls.
@@ -227,7 +233,13 @@ where
     /// Remove a key from the tree.  Runs in O(lg lg u) time.
     pub fn remove(&mut self, key: &K) {
         #[cfg(any(test, feature = "safety_checks"))]
-        assert!(*key <= K::size_to_key(&self.max_size), "key must be representable by cluster's maximum size: key={:?}, max_size={:?}, size_to_key={:?}", key, self.max_size, K::size_to_key(&self.max_size));
+        assert!(
+            *key <= K::size_to_key(&self.max_size),
+            "key must be representable by cluster's maximum size: key={:?}, max_size={:?}, size_to_key={:?}",
+            key,
+            self.max_size,
+            K::size_to_key(&self.max_size)
+        );
 
         let mut key = Cow::Borrowed(key);
         if let Some((min_key, _)) = self.min.as_ref() {
@@ -296,7 +308,13 @@ where
     /// Get the successor of the given key.  Runs in O(lg lg u) time.
     pub fn successor(&self, key: &K) -> Option<(K, V)> {
         #[cfg(any(test, feature = "safety_checks"))]
-        assert!(*key <= K::size_to_key(&self.max_size), "key must be representable by cluster's maximum size: key={:?}, max_size={:?}, size_to_key={:?}", key, self.max_size, K::size_to_key(&self.max_size));
+        assert!(
+            *key <= K::size_to_key(&self.max_size),
+            "key must be representable by cluster's maximum size: key={:?}, max_size={:?}, size_to_key={:?}",
+            key,
+            self.max_size,
+            K::size_to_key(&self.max_size)
+        );
 
         // If the key is less than the min, then the successor is the min.
         if let Some((min_key, min_value)) = self.min.as_ref() {
@@ -317,9 +335,14 @@ where
                     match successor {
                         // This should never happen since we checked that the
                         // key is less than the cluster max.
-                        None => panic!("key is less than cluster max, but successor wasn't found; key={key:?}, h={h:?}, l={l:?}, cluster_max={cluster_max:?}"),
+                        None => panic!(
+                            "key is less than cluster max, but successor wasn't found; key={key:?}, h={h:?}, l={l:?}, cluster_max={cluster_max:?}"
+                        ),
                         Some((next_l, v)) => {
-                            return Some((h.index(next_l, &self.cluster_size), v));
+                            return Some((
+                                h.index(next_l, &self.cluster_size),
+                                v,
+                            ));
                         }
                     }
                 }
@@ -355,7 +378,13 @@ where
     /// Get the predecessor of the given key.  Runs in O(lg lg u) time.
     pub fn predecessor(&self, key: &K) -> Option<(K, V)> {
         #[cfg(any(test, feature = "safety_checks"))]
-        assert!(*key <= K::size_to_key(&self.max_size), "key must be representable by cluster's maximum size: key={:?}, max_size={:?}, size_to_key={:?}", key, self.max_size, K::size_to_key(&self.max_size));
+        assert!(
+            *key <= K::size_to_key(&self.max_size),
+            "key must be representable by cluster's maximum size: key={:?}, max_size={:?}, size_to_key={:?}",
+            key,
+            self.max_size,
+            K::size_to_key(&self.max_size)
+        );
 
         // If the key is greater than the max, then the predecessor is the max.
         if let Some((max_key, max_value)) = self.max.as_ref() {
@@ -376,9 +405,14 @@ where
                     match predecessor {
                         // This should never happen since we checked that the
                         // key is less than the cluster min.
-                        None => panic!("key is less than cluster min, but predecessor wasn't found; key={key:?}, h={h:?}, l={l:?}, cluster_min={cluster_min:?}"),
+                        None => panic!(
+                            "key is less than cluster min, but predecessor wasn't found; key={key:?}, h={h:?}, l={l:?}, cluster_min={cluster_min:?}"
+                        ),
                         Some((next_l, v)) => {
-                            return Some((h.index(next_l, &self.cluster_size), v));
+                            return Some((
+                                h.index(next_l, &self.cluster_size),
+                                v,
+                            ));
                         }
                     }
                 }

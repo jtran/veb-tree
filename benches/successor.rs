@@ -1,7 +1,7 @@
 use std::{collections::BTreeMap, time::Duration};
 
 use criterion::{
-    black_box, criterion_group, criterion_main, BenchmarkId, Criterion,
+    BenchmarkId, Criterion, black_box, criterion_group, criterion_main,
 };
 use rand::Rng;
 
