@@ -7,14 +7,15 @@ use rand::Rng;
 
 fn bench_successor_single(c: &mut Criterion) {
     let mut group = c.benchmark_group("successor_single");
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     for num_keys in [
         10_000, 100_000, 500_000, 1_000_000, 10_000_000, 20_000_000,
         30_000_000, 40_000_000,
     ] {
         // Generate random keys.
-        let keys: Vec<u64> =
-            (0..num_keys).map(|_| rng.gen_range(0..=u64::MAX)).collect();
+        let keys: Vec<u64> = (0..num_keys)
+            .map(|_| rng.random_range(0..=u64::MAX))
+            .collect();
 
         // Insert the same keys into each implementation.
         let mut tree = veb_tree::VebTreeMap::<u64, u64>::new();
@@ -56,7 +57,7 @@ macro_rules! bench_successor_key {
         fn $fn_name(c: &mut Criterion) {
             let mut group = c.benchmark_group($name);
             group.measurement_time(Duration::from_secs(20));
-            let mut rng = rand::thread_rng();
+            let mut rng = rand::rng();
 
             for num_keys in [
                 10_000, 100_000, 500_000, 1_000_000, 10_000_000, 20_000_000,
@@ -85,7 +86,7 @@ macro_rules! bench_successor_key {
 
                 // Generate random keys to search for.
                 let mut target_keys: Vec<$key_ty> = (0..num_targets)
-                    .map(|_| rng.gen_range(0..=$max_key))
+                    .map(|_| rng.random_range(0..=$max_key))
                     .collect();
 
                 if $sort_keys {

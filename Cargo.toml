@@ -11,7 +11,7 @@ safety_checks = []
 [dev-dependencies]
 criterion = { version = "0.5", features = ["html_reports"] }
 proptest = "1"
-rand = "0.8.5"
+rand = "0.9"
 
 [[bench]]
 name = "successor"
