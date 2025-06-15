@@ -1,8 +1,6 @@
-use std::{collections::BTreeMap, time::Duration};
+use std::{collections::BTreeMap, hint::black_box, time::Duration};
 
-use criterion::{
-    BenchmarkId, Criterion, black_box, criterion_group, criterion_main,
-};
+use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use rand::Rng;
 
 fn bench_successor_single(c: &mut Criterion) {
