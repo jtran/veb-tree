@@ -199,13 +199,13 @@ where
             return return_value;
         }
 
-        if let Some((min_key, _)) = self.min.as_ref() {
-            if key == *min_key {
-                // If the key is the same as the min key, min and max were
-                // duplicates, and we just swapped the key with the max so that
-                // they aren't duplicates anymore.
-                return None;
-            }
+        if let Some((min_key, _)) = self.min.as_ref()
+            && key == *min_key
+        {
+            // If the key is the same as the min key, min and max were
+            // duplicates, and we just swapped the key with the max so that
+            // they aren't duplicates anymore.
+            return None;
         }
 
         let h = key.high(&self.cluster_size);
@@ -242,29 +242,27 @@ where
         );
 
         let mut key = Cow::Borrowed(key);
-        if let Some((min_key, _)) = self.min.as_ref() {
-            if *key == *min_key {
-                match self.summary.as_ref().and_then(|summary| summary.min()) {
-                    None => {
-                        self.min = None;
-                        self.max = None;
-                        return;
-                    }
-                    Some((summary_min, _)) => {
-                        let cluster = self
-                            .clusters
-                            .get_mut(&summary_min)
-                            .expect("cluster for summary min should exist");
-                        let (cluster_min, new_min_value) = cluster
-                            .min()
-                            .expect(
-                            "cluster for summary min should have a min element",
-                        );
-                        let new_min_key =
-                            summary_min.index(cluster_min, &self.cluster_size);
-                        self.min = Some((new_min_key.clone(), new_min_value));
-                        key = Cow::Owned(new_min_key);
-                    }
+        if let Some((min_key, _)) = self.min.as_ref()
+            && *key == *min_key
+        {
+            match self.summary.as_ref().and_then(|summary| summary.min()) {
+                None => {
+                    self.min = None;
+                    self.max = None;
+                    return;
+                }
+                Some((summary_min, _)) => {
+                    let cluster = self
+                        .clusters
+                        .get_mut(&summary_min)
+                        .expect("cluster for summary min should exist");
+                    let (cluster_min, new_min_value) = cluster.min().expect(
+                        "cluster for summary min should have a min element",
+                    );
+                    let new_min_key =
+                        summary_min.index(cluster_min, &self.cluster_size);
+                    self.min = Some((new_min_key.clone(), new_min_value));
+                    key = Cow::Owned(new_min_key);
                 }
             }
         }
@@ -272,34 +270,32 @@ where
         let h = key.high(&self.cluster_size);
         if let Some(cluster) = self.clusters.get_mut(&h) {
             cluster.remove(&key.low(&self.cluster_size));
-            if cluster.is_empty() {
-                if let Some(summary) = self.summary.as_mut() {
-                    summary.remove(&h);
-                }
+            if cluster.is_empty()
+                && let Some(summary) = self.summary.as_mut()
+            {
+                summary.remove(&h);
             }
         }
 
-        if let Some((max_key, _)) = self.max.as_ref() {
-            if *key == *max_key {
-                // TODO: summary should never be None here.
-                match self.summary.as_ref().and_then(|summary| summary.max()) {
-                    None => {
-                        self.max = self.min.clone();
-                    }
-                    Some((summary_max, _)) => {
-                        let cluster = self
-                            .clusters
-                            .get_mut(&summary_max)
-                            .expect("cluster for summary min should exist");
-                        let (cluster_max, new_max_value) = cluster
-                            .max()
-                            .expect(
-                            "cluster for summary min should have a min element",
-                        );
-                        let new_max_key =
-                            summary_max.index(cluster_max, &self.cluster_size);
-                        self.max = Some((new_max_key, new_max_value));
-                    }
+        if let Some((max_key, _)) = self.max.as_ref()
+            && *key == *max_key
+        {
+            // TODO: summary should never be None here.
+            match self.summary.as_ref().and_then(|summary| summary.max()) {
+                None => {
+                    self.max = self.min.clone();
+                }
+                Some((summary_max, _)) => {
+                    let cluster = self
+                        .clusters
+                        .get_mut(&summary_max)
+                        .expect("cluster for summary min should exist");
+                    let (cluster_max, new_max_value) = cluster.max().expect(
+                        "cluster for summary min should have a min element",
+                    );
+                    let new_max_key =
+                        summary_max.index(cluster_max, &self.cluster_size);
+                    self.max = Some((new_max_key, new_max_value));
                 }
             }
         }
@@ -317,33 +313,30 @@ where
         );
 
         // If the key is less than the min, then the successor is the min.
-        if let Some((min_key, min_value)) = self.min.as_ref() {
-            if *key < *min_key {
-                return Some((min_key.clone(), min_value.clone()));
-            }
+        if let Some((min_key, min_value)) = self.min.as_ref()
+            && *key < *min_key
+        {
+            return Some((min_key.clone(), min_value.clone()));
         }
 
         // If the key is less than its cluster's max, then the successor is in
         // that cluster.
         let h = key.high(&self.cluster_size);
-        if let Some(cluster) = self.clusters.get(&h) {
-            if let Some((cluster_max, _)) = cluster.max() {
-                let l = key.low(&self.cluster_size);
-                if l < cluster_max {
-                    // Recurse.
-                    let successor = cluster.successor(&l);
-                    match successor {
-                        // This should never happen since we checked that the
-                        // key is less than the cluster max.
-                        None => panic!(
-                            "key is less than cluster max, but successor wasn't found; key={key:?}, h={h:?}, l={l:?}, cluster_max={cluster_max:?}"
-                        ),
-                        Some((next_l, v)) => {
-                            return Some((
-                                h.index(next_l, &self.cluster_size),
-                                v,
-                            ));
-                        }
+        if let Some(cluster) = self.clusters.get(&h)
+            && let Some((cluster_max, _)) = cluster.max()
+        {
+            let l = key.low(&self.cluster_size);
+            if l < cluster_max {
+                // Recurse.
+                let successor = cluster.successor(&l);
+                match successor {
+                    // This should never happen since we checked that the
+                    // key is less than the cluster max.
+                    None => panic!(
+                        "key is less than cluster max, but successor wasn't found; key={key:?}, h={h:?}, l={l:?}, cluster_max={cluster_max:?}"
+                    ),
+                    Some((next_l, v)) => {
+                        return Some((h.index(next_l, &self.cluster_size), v));
                     }
                 }
             }
@@ -353,23 +346,19 @@ where
         // is the min in that cluster.
         if let Some(summary) = &self.summary {
             // Recurse.
-            if let Some((next_h, _)) = summary.successor(&h) {
-                if let Some(next_cluster) = self.clusters.get(&next_h) {
-                    if let Some((next_l, v)) = next_cluster.min() {
-                        return Some((
-                            next_h.index(next_l, &self.cluster_size),
-                            v,
-                        ));
-                    }
-                }
+            if let Some((next_h, _)) = summary.successor(&h)
+                && let Some(next_cluster) = self.clusters.get(&next_h)
+                && let Some((next_l, v)) = next_cluster.min()
+            {
+                return Some((next_h.index(next_l, &self.cluster_size), v));
             }
         }
 
         // If the key is less than the max, then the successor is the max.
-        if let Some((max_key, max_value)) = self.max.as_ref() {
-            if *key < *max_key {
-                return Some((max_key.clone(), max_value.clone()));
-            }
+        if let Some((max_key, max_value)) = self.max.as_ref()
+            && *key < *max_key
+        {
+            return Some((max_key.clone(), max_value.clone()));
         }
 
         None
@@ -387,33 +376,30 @@ where
         );
 
         // If the key is greater than the max, then the predecessor is the max.
-        if let Some((max_key, max_value)) = self.max.as_ref() {
-            if *key > *max_key {
-                return Some((max_key.clone(), max_value.clone()));
-            }
+        if let Some((max_key, max_value)) = self.max.as_ref()
+            && *key > *max_key
+        {
+            return Some((max_key.clone(), max_value.clone()));
         }
 
         // If the key is greater than its cluster's min, then the predecessor is
         // in that cluster.
         let h = key.high(&self.cluster_size);
-        if let Some(cluster) = self.clusters.get(&h) {
-            if let Some((cluster_min, _)) = cluster.min() {
-                let l = key.low(&self.cluster_size);
-                if l > cluster_min {
-                    // Recurse.
-                    let predecessor = cluster.predecessor(&l);
-                    match predecessor {
-                        // This should never happen since we checked that the
-                        // key is less than the cluster min.
-                        None => panic!(
-                            "key is less than cluster min, but predecessor wasn't found; key={key:?}, h={h:?}, l={l:?}, cluster_min={cluster_min:?}"
-                        ),
-                        Some((next_l, v)) => {
-                            return Some((
-                                h.index(next_l, &self.cluster_size),
-                                v,
-                            ));
-                        }
+        if let Some(cluster) = self.clusters.get(&h)
+            && let Some((cluster_min, _)) = cluster.min()
+        {
+            let l = key.low(&self.cluster_size);
+            if l > cluster_min {
+                // Recurse.
+                let predecessor = cluster.predecessor(&l);
+                match predecessor {
+                    // This should never happen since we checked that the
+                    // key is less than the cluster min.
+                    None => panic!(
+                        "key is less than cluster min, but predecessor wasn't found; key={key:?}, h={h:?}, l={l:?}, cluster_min={cluster_min:?}"
+                    ),
+                    Some((next_l, v)) => {
+                        return Some((h.index(next_l, &self.cluster_size), v));
                     }
                 }
             }
@@ -423,23 +409,19 @@ where
         // predecessor is the max in that cluster.
         if let Some(summary) = &self.summary {
             // Recurse.
-            if let Some((prev_h, _)) = summary.predecessor(&h) {
-                if let Some(prev_cluster) = self.clusters.get(&prev_h) {
-                    if let Some((prev_l, v)) = prev_cluster.max() {
-                        return Some((
-                            prev_h.index(prev_l, &self.cluster_size),
-                            v,
-                        ));
-                    }
-                }
+            if let Some((prev_h, _)) = summary.predecessor(&h)
+                && let Some(prev_cluster) = self.clusters.get(&prev_h)
+                && let Some((prev_l, v)) = prev_cluster.max()
+            {
+                return Some((prev_h.index(prev_l, &self.cluster_size), v));
             }
         }
 
         // If the key is greater than the min, then the predecessor is the min.
-        if let Some((min_key, min_value)) = self.min.as_ref() {
-            if *key > *min_key {
-                return Some((min_key.clone(), min_value.clone()));
-            }
+        if let Some((min_key, min_value)) = self.min.as_ref()
+            && *key > *min_key
+        {
+            return Some((min_key.clone(), min_value.clone()));
         }
 
         None
