@@ -15,7 +15,7 @@ the standard library.
 
 _u_ is the size of the key universe.  For example, if your key needs to be any
 64-bit integer, then _u_ = 2<sup>64</sup>.  _n_ is the number of items in the
-tree, each in the range [0, _u_ - 1].
+tree, each in the range \[0, _u_ - 1\].
 
 Operation|Bound|
 ---|---
